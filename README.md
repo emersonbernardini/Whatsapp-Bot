@@ -2,214 +2,108 @@
 
 ![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![WhatsApp](https://img.shields.io/badge/WhatsApp-25D366?logo=whatsapp&logoColor=white)
 
-Professional WhatsApp bot with modular architecture for automated customer service and support.
+Bot de WhatsApp com arquitetura modular para atendimento automatizado, construído sobre `whatsapp-web.js`.
 
-## Features
+## Recursos
 
-- **Modular Architecture**: Clean separation of concerns with dedicated modules
-- **Auto-Reconnection**: Automatic reconnection handling with exponential backoff
-- **Environment Configuration**: Secure credential management via `.env` files
-- **Command Routing**: Flexible command handler system
-- **Typing Simulation**: Natural conversation flow with typing indicators
-- **Message Scheduling**: Schedule delayed messages for timed responses
-- **Graceful Shutdown**: Clean process termination handling
-- **Extensible**: Easy to add new commands and features
+- **Arquitetura modular:** cliente, serviços, roteador e handlers separados.
+- **Reconexão automática** com backoff exponencial.
+- **Configuração por ambiente** via `.env`.
+- **Roteamento de comandos** extensível, inclusive em tempo de execução.
+- **Simulação de digitação** para um fluxo de conversa natural.
+- **Agendamento de mensagens** com atraso configurável.
+- **Encerramento gracioso** em sinais do processo.
 
-## Architecture
+## Arquitetura
 
 ```
-whatsapp-bot/
+Whatsapp-Bot/
 ├── config/
-│   ├── constants.js       # Configuration and environment variables
-│   └── messages.js        # Message templates
+│   ├── constants.js        # Configuração e variáveis de ambiente
+│   └── messages.js         # Templates de mensagem
 ├── modules/
-│   ├── whatsapp-client.js # WhatsApp connection management
-│   ├── message-service.js # Message sending utilities
-│   └── api-service.js     # External API integration
+│   ├── whatsapp-client.js  # Gerenciamento da conexão
+│   ├── message-service.js  # Envio de mensagens
+│   └── api-service.js      # Integração com API externa
 ├── handlers/
-│   ├── message-router.js  # Message routing logic
-│   └── command-handlers.js # Command implementations
-├── utils/
-│   └── helpers.js         # Utility functions
-├── .env.example           # Environment variables template
-├── .gitignore
-├── package.json
-├── index.js               # Application entry point
-└── README.md
+│   ├── message-router.js   # Roteamento de mensagens
+│   └── command-handlers.js # Implementação dos comandos
+├── utils/helpers.js
+├── .env.example
+└── index.js                # Ponto de entrada
 ```
 
-## Installation
+## Instalação
 
-### Prerequisites
+Requisitos: Node.js 18+ ou Bun.
 
-- Node.js 18+ or Bun runtime
-- npm or yarn
-
-### Setup
-
-1. Clone the repository:
 ```bash
-git clone https://github.com/lumaxs/whatsapp-bot.git
-cd whatsapp-bot
-```
-
-2. Install dependencies:
-```bash
-npm install
-# or
-yarn install
-# or
-bun install
-```
-
-3. Configure environment:
-```bash
+git clone https://github.com/emersonbernardini/Whatsapp-Bot.git
+cd Whatsapp-Bot
+bun install        # ou: npm install
 cp .env.example .env
-# Edit .env with your configuration
+bun start          # ou: npm start
 ```
 
-4. Start the bot:
+Escaneie o QR Code exibido no terminal com o WhatsApp para autenticar.
+
+## Configuração
+
+Copie `.env.example` para `.env` e ajuste:
+
 ```bash
-npm start
-# or
-bun start
-```
-
-5. Scan the QR code with WhatsApp to authenticate
-
-## Configuration
-
-Create a `.env` file based on `.env.example`:
-
-```env
-# WhatsApp Configuration
+# WhatsApp
 CLIENT_NAME=your-bot-name
 AUTH_DATA_PATH=./.wwebjs_auth
 
-# API Configuration
+# API externa
 API_BASE_URL=https://api.example.com
 API_ENDPOINT_TRIAL=/path/to/trial
 API_USER_AGENT=Mozilla/5.0
 
-# Timing Configuration (milliseconds)
+# Tempos (ms)
 TYPING_START_DELAY=3000
 TYPING_DURATION=2000
 TRIAL_EXPIRY_TIME=14400000
 
-# Puppeteer Configuration
+# Puppeteer
 PUPPETEER_HEADLESS=true
 PUPPETEER_TIMEOUT=60000
 PUPPETEER_PROTOCOL_TIMEOUT=180000
 ```
 
-## Usage
+## Uso
 
-### Available Commands
+**Palavras de ativação:** `oi`, `ola`, `bom dia`, `boa tarde`, `boa noite`
 
-**Activation Words:**
-- `oi`, `ola`, `bom dia`, `boa tarde`, `boa noite`
+**Comandos:** `!menu` (menu principal), `1-6` (opções do menu), `!trial` (gera um período de teste via API externa), `!player` (ajuda de configuração do player) e `subscribe` (processo de assinatura).
 
-**Menu Commands:**
-- `!menu` - Display main menu
-- `1-6` - Menu options
-- `!trial` - Generate free trial
-- `!player` - Player setup help
-- `subscribe` - Subscription process
+### Adicionando comandos
 
-### Adding Custom Commands
+Em `handlers/command-handlers.js`:
 
-Add new command handlers in `handlers/command-handlers.js`:
-
-```javascript
+```js
 export const commandHandlers = {
-  // ... existing commands
-  
-  'your-command': async ({ chat, msg, client, name }) => {
-    await messageService.sendWithTyping(
-      chat, msg, client,
-      'Your response here'
-    );
+  'meu-comando': async ({ chat, msg, client, name }) => {
+    await messageService.sendWithTyping(chat, msg, client, 'Resposta aqui');
   },
 };
 ```
 
-### Runtime Command Addition
+Ou em tempo de execução:
 
-```javascript
+```js
 const router = new MessageRouter(client);
-
 router.addHandler('custom', async ({ chat, msg, client }) => {
-  await messageService.sendWithTyping(chat, msg, client, 'Custom response');
+  await messageService.sendWithTyping(chat, msg, client, 'Resposta');
 });
-
 router.listen();
 ```
 
-## Development
+## Produção
 
-### Project Structure
-
-- **config/**: Application configuration and constants
-- **modules/**: Core functionality (WhatsApp client, services)
-- **handlers/**: Message routing and command handling
-- **utils/**: Helper functions and utilities
-
-### Best Practices
-
-- All configuration in `config/constants.js`
-- Message templates in `config/messages.js`
-- Use services for external interactions
-- Keep handlers focused on single responsibility
-- Add JSDoc comments for public methods
-- Use private methods (`#method`) for internal logic
-
-## API Integration
-
-The bot integrates with external APIs through `modules/api-service.js`. Configure your API endpoints in `.env`:
-
-```javascript
-const response = await apiService.generateFreeTrial();
-```
-
-## Error Handling
-
-The bot includes comprehensive error handling:
-
-- Network errors with retry logic
-- Invalid message validation
-- API failure recovery
-- Graceful shutdown on signals
-
-## Logging
-
-Structured logging with emoji indicators:
-
-- ℹ️ Info messages
-- ✅ Success operations
-- ❌ Error events
-- ⚠️  Warnings
-
-## Security
-
-- **Environment Variables**: Sensitive data in `.env` (not committed)
-- **Input Validation**: All user inputs validated
-- **Private Methods**: Internal logic encapsulated
-- **Error Messages**: No sensitive data in error responses
-
-## Deployment
-
-### Production Checklist
-
-- [ ] Set `PUPPETEER_HEADLESS=true`
-- [ ] Configure proper timeouts
-- [ ] Set up process manager (PM2, systemd)
-- [ ] Enable error logging
-- [ ] Set up monitoring
-- [ ] Secure `.env` file permissions
-
-### Using PM2
+Use um gerenciador de processos, por exemplo PM2:
 
 ```bash
 pm2 start index.js --name whatsapp-bot
@@ -217,50 +111,22 @@ pm2 save
 pm2 startup
 ```
 
-## Troubleshooting
+Mantenha `PUPPETEER_HEADLESS=true`, restrinja as permissões do `.env` e monitore os logs.
 
-**QR Code Not Appearing:**
-- Check Puppeteer configuration
-- Ensure sufficient memory
-- Try running with `PUPPETEER_HEADLESS=false`
+## Solução de problemas
 
-**Connection Drops:**
-- Check network stability
-- Verify WhatsApp Web is accessible
-- Adjust timeout values in `.env`
+- **QR Code não aparece:** revise a configuração do Puppeteer, confirme memória suficiente ou rode com `PUPPETEER_HEADLESS=false`.
+- **Conexão cai:** verifique a rede e ajuste os timeouts no `.env`.
+- **Comando não responde:** confira o registro do handler e os logs.
 
-**Commands Not Working:**
-- Verify command normalization
-- Check handler registration
-- Review logs for errors
+## Aviso
 
-## Contributing
+Este projeto usa a API não oficial do WhatsApp Web. Use com responsabilidade e respeite os Termos de Serviço do WhatsApp.
 
-Contributions welcome! Please follow these guidelines:
+## Licença
 
-1. Follow existing code style
-2. Add JSDoc comments
-3. Update README for new features
-4. Test thoroughly before submitting
-5. Keep commits atomic and descriptive
+MIT. Veja [LICENSE](LICENSE).
 
-## License
+## Créditos
 
-MIT License - see LICENSE file for details
-
-## Acknowledgments
-
-- [whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js) - WhatsApp Web API
-- [qrcode-terminal](https://github.com/gtanner/qrcode-terminal) - QR code generation
-- [chalk](https://github.com/chalk/chalk) - Terminal styling
-
-## Support
-
-For issues and questions:
-- Open an issue on GitHub
-- Check existing issues for solutions
-- Review documentation
-
----
-
-**Note:** This bot uses unofficial WhatsApp Web API. Use responsibly and comply with WhatsApp Terms of Service.
+[whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js), [qrcode-terminal](https://github.com/gtanner/qrcode-terminal) e [chalk](https://github.com/chalk/chalk).
